@@ -46,10 +46,14 @@ class ImageAnalysisView(APIView):
 
                 # 4. Відправляємо запит до Gemini
                 # Ми передаємо список: текст-запит та саму картинку
-                response = model.generate_content([
-                    "Опиши, що ти бачиш на цьому зображенні українською мовою.",
-                    {'mime_type': 'image/jpeg', 'data': image_data}
-                ])
+                response = model.generate_content(
+                    [
+                        "Опиши, що ти бачиш на цьому зображенні українською мовою.",
+                        {'mime_type': 'image/jpeg', 'data': image_data}
+                    ],
+                    request_options={"timeout": 600}  # Додаємо тут, через кому після списку
+                )
+
 
                 # 5. Зберігаємо відповідь від Gemini в базу
                 instance.analysis_result = response.text
