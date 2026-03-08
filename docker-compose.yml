@@ -1,18 +1,4 @@
 services:
-  db:
-    image: postgres:15
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=gemini_db
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d gemini_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
@@ -20,11 +6,11 @@ services:
       - .:/app
     ports:
       - "8000:8000"
+    environment:
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
     env_file:
       - .env
-    depends_on:
-      db:
-        condition: service_healthy
-
-volumes:
-  postgres_data:
