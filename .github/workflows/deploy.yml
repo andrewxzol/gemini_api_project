@@ -21,4 +21,5 @@ jobs:
           script: |
             cd ~/gemini_api_project
             git pull origin development
+            docker-compose down
             docker-compose up -d --build
