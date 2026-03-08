@@ -20,5 +20,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~/gemini_api_project
-            git pull origin main
+            git pull origin development
             docker-compose up -d --build
