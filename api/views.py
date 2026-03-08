@@ -37,7 +37,7 @@ class ImageAnalysisView(APIView):
             try:
                 # 3. Готуємо модель Gemini
                 # 'gemini-1.5-flash' — швидка модель, що вміє читати картинки
-                model = genai.GenerativeModel('models/gemini-flash-latest')
+                model = genai.GenerativeModel('models/gemini-2.5-flash')
 
                 # Відкриваємо файл, який щойно зберігся на диск
                 img_path = instance.image.path
