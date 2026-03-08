@@ -29,3 +29,4 @@ jobs:
             echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
             docker-compose down
             docker-compose up -d --build
+            docker-compose exec -T web python manage.py migrate
