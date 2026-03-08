@@ -9,7 +9,10 @@ from .serializers import GeminiImageSerializer
 from django.conf import settings
 
 # Налаштовуємо Gemini API ключем з нашого .env файлу
-genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+api_key = os.getenv('GEMINI_API_KEY')
+if not api_key:
+    print("WARNING: GEMINI_API_KEY is not set in environment variables!")
+genai.configure(api_key=api_key)
 
 
 class ImageAnalysisView(APIView):
