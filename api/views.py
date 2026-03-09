@@ -7,6 +7,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from .models import GeminiImage
 from .serializers import GeminiImageSerializer
+from drf_spectacular.utils import extend_schema
 
 # Налаштування Gemini API
 GENAI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -18,6 +19,22 @@ else:
 
 class GeminiImageUploadView(APIView):
     parser_classes = (MultiPartParser, FormParser)
+
+    @extend_schema(
+        operation_id="upload_image",
+        request={
+            'multipart/form-data': {
+                'type': 'object',
+                'properties': {
+                    'image': {
+                        'type': 'string',
+                        'format': 'binary'
+                    }
+                }
+            }
+        },
+        responses={201: GeminiImageSerializer},
+    )
 
     def post(self, request, *args, **kwargs):
         serializer = GeminiImageSerializer(data=request.data)
