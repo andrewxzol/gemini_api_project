@@ -1,72 +1,65 @@
-import google.generativeai as genai
 import os
-from drf_spectacular.utils import extend_schema
+import google.generativeai as genai
+from django.core.cache import cache
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from .models import GeminiImage
 from .serializers import GeminiImageSerializer
-from django.conf import settings
 
-# Налаштовуємо Gemini API ключем з нашого .env файлу
-api_key = os.getenv('GEMINI_API_KEY')
-if not api_key:
-    print("WARNING: GEMINI_API_KEY is not set in environment variables!")
-genai.configure(api_key=api_key)
+# Налаштування Gemini API
+GENAI_API_KEY = os.getenv("GEMINI_API_KEY")
+if GENAI_API_KEY:
+    genai.configure(api_key=GENAI_API_KEY)
+else:
+    print("WARNING: GEMINI_API_KEY is not set in environment variables.")
 
 
-class ImageAnalysisView(APIView):
-    @extend_schema(
-        request={
-            'multipart/form-data': {
-                'type': 'object',
-                'properties': {
-                    'image': {
-                        'type': 'string',
-                        'format': 'binary'
-                    }
-                }
-            }
-        }
-    )
+class GeminiImageUploadView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
     def post(self, request, *args, **kwargs):
-        # 1. Приймаємо дані через серіалізатор
         serializer = GeminiImageSerializer(data=request.data)
-
         if serializer.is_valid():
-            # 2. Зберігаємо об'єкт у базу (поки без аналізу)
+            # 1. Збереження об'єкта в базу даних RDS
             instance = serializer.save()
+            image_path = instance.image.path
 
+            # 2. Формування ключа кешування (використовуємо ID запису)
+            cache_key = f"gemini_analysis_{instance.id}"
+
+            # 3. Перевірка наявності результату в Redis
+            cached_result = cache.get(cache_key)
+            if cached_result:
+                print(f"CACHE HIT: Loading analysis for image {instance.id} from Redis")
+                instance.analysis_result = cached_result
+                instance.save()
+                return Response(GeminiImageSerializer(instance).data, status=status.HTTP_200_OK)
+
+            # 4. Виконання запиту до Gemini API, якщо кеш порожній
+            print(f"API CALL: Requesting Gemini for image {instance.id}")
             try:
-                # 3. Готуємо модель Gemini
-                # 'gemini-1.5-flash' — швидка модель, що вміє читати картинки
-                model = genai.GenerativeModel('models/gemini-2.5-flash')
+                model = genai.GenerativeModel('gemini-1.5-flash')
 
-                # Відкриваємо файл, який щойно зберігся на диск
-                img_path = instance.image.path
-                with open(img_path, 'rb') as f:
-                    image_data = f.read()
+                # Завантаження файлу в Gemini API
+                sample_file = genai.upload_file(path=image_path, display_name=f"upload_{instance.id}")
 
-                # 4. Відправляємо запит до Gemini
-                # Ми передаємо список: текст-запит та саму картинку
-                response = model.generate_content(
-                    [
-                        "Опиши, що ти бачиш на цьому зображенні українською мовою.",
-                        {'mime_type': 'image/jpeg', 'data': image_data}
-                    ],
-                    request_options={"timeout": 600}  # Додаємо тут, через кому після списку
-                )
+                # Генерація контенту
+                response = model.generate_content([sample_file, "Describe this image in detail."])
+                analysis_text = response.text
 
+                # 5. Збереження результату в Redis на 24 години (86400 секунд)
+                cache.set(cache_key, analysis_text, 86400)
 
-                # 5. Зберігаємо відповідь від Gemini в базу
-                instance.analysis_result = response.text
+                # 6. Оновлення запису в базі даних
+                instance.analysis_result = analysis_text
                 instance.save()
 
-                # Повертаємо оновлені дані користувачу
                 return Response(GeminiImageSerializer(instance).data, status=status.HTTP_201_CREATED)
 
             except Exception as e:
-                # Якщо щось пішло не так (наприклад, ключ не підійшов)
-                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                print(f"ERROR: Gemini API call failed: {str(e)}")
+                return Response({"error": "Failed to analyze image"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
