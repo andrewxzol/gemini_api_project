@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import ImageAnalysisView
+from .views import GeminiImageUploadView
 
 urlpatterns = [
-    path('analyze/', ImageAnalysisView.as_view(), name='image-analyze'),
+    path('upload/', GeminiImageUploadView.as_view(), name='image-upload'),
 ]
