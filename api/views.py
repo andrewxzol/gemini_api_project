@@ -35,7 +35,6 @@ class GeminiImageUploadView(APIView):
         },
         responses={201: GeminiImageSerializer},
     )
-
     def post(self, request, *args, **kwargs):
         serializer = GeminiImageSerializer(data=request.data)
         if serializer.is_valid():
@@ -43,7 +42,7 @@ class GeminiImageUploadView(APIView):
             instance = serializer.save()
             image_path = instance.image.path
 
-            # 2. Формування ключа кешування (використовуємо ID запису)
+            # 2. Формування ключа кешування
             cache_key = f"gemini_analysis_{instance.id}"
 
             # 3. Перевірка наявності результату в Redis
@@ -54,19 +53,25 @@ class GeminiImageUploadView(APIView):
                 instance.save()
                 return Response(GeminiImageSerializer(instance).data, status=status.HTTP_200_OK)
 
+            # --- ВАЖЛИВО: Цей блок має бути НА ОДНОМУ РІВНІ з "if cached_result", а не всередині нього ---
+
             # 4. Виконання запиту до Gemini API, якщо кеш порожній
             print(f"API CALL: Requesting Gemini for image {instance.id}")
             try:
-                model = genai.GenerativeModel('models/gemini-2.5-flash')
+                model = genai.GenerativeModel('gemini-1.5-flash')
 
-                # Завантаження файлу в Gemini API
-                sample_file = genai.upload_file(path=image_path, display_name=f"upload_{instance.id}")
+                with open(image_path, 'rb') as f:
+                    image_data = f.read()
 
-                # Генерація контенту
-                response = model.generate_content([sample_file, "Describe this image in detail."])
+                content = [
+                    "Describe this image in detail.",
+                    {"mime_type": "image/jpeg", "data": image_data}
+                ]
+
+                response = model.generate_content(content)
                 analysis_text = response.text
 
-                # 5. Збереження результату в Redis на 24 години (86400 секунд)
+                # 5. Зберігаємо результат у Redis на 24 години
                 cache.set(cache_key, analysis_text, 86400)
 
                 # 6. Оновлення запису в базі даних
@@ -76,7 +81,8 @@ class GeminiImageUploadView(APIView):
                 return Response(GeminiImageSerializer(instance).data, status=status.HTTP_201_CREATED)
 
             except Exception as e:
-                print(f"ERROR: Gemini API call failed: {str(e)}")
-                return Response({"error": "Failed to analyze image"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                import traceback
+                print(f"FULL ERROR:\n{traceback.format_exc()}")
+                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
