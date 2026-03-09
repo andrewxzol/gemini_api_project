@@ -58,7 +58,7 @@ class GeminiImageUploadView(APIView):
             # 4. Виконання запиту до Gemini API, якщо кеш порожній
             print(f"API CALL: Requesting Gemini for image {instance.id}")
             try:
-                model = genai.GenerativeModel('gemini-1.5-flash')
+                model = genai.GenerativeModel('models/gemini-2.5-flash')
 
                 with open(image_path, 'rb') as f:
                     image_data = f.read()
