@@ -14,3 +14,10 @@ services:
       - DB_PORT=${DB_PORT}
     env_file:
       - .env
+  redis:
+    image: redis:alpine
+    container_name: gemini_redis
+    command: redis-server --save 60 1 --loglevel warning
+    ports:
+      - "6379:6379"
+    restart: always
