@@ -24,3 +24,11 @@ class ImageAnalysis(models.Model):
 
     def __str__(self):
         return f"Analysis {self.id} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+
+class TestModel(models.Model):
+    name = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
