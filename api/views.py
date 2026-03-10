@@ -1,5 +1,6 @@
 import os
 import google.generativeai as genai
+import hashlib
 from django.core.cache import cache
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -42,23 +43,27 @@ class GeminiImageUploadView(APIView):
             instance = serializer.save()
             image_path = instance.image.path
 
-            # 2. Формування ключа кешування
-            cache_key = f"gemini_analysis_{instance.id}"
+            # Створюємо хеш файлу, щоб впізнати однакові картинки
+            with open(image_path, 'rb') as f:
+                file_hash = hashlib.md5(f.read()).hexdigest()
+
+            # ВИПРАВЛЕНО: Використовуємо хеш як ключ кешу
+            cache_key = f"gemini_hash_{file_hash}"
 
             # 3. Перевірка наявності результату в Redis
             cached_result = cache.get(cache_key)
             if cached_result:
-                print(f"CACHE HIT: Loading analysis for image {instance.id} from Redis")
+                print(f"CACHE HIT: Loading analysis for hash {file_hash} from Redis")
                 instance.analysis_result = cached_result
                 instance.save()
                 return Response(GeminiImageSerializer(instance).data, status=status.HTTP_200_OK)
 
-            # --- ВАЖЛИВО: Цей блок має бути НА ОДНОМУ РІВНІ з "if cached_result", а не всередині нього ---
-
-            # 4. Виконання запиту до Gemini API, якщо кеш порожній
-            print(f"API CALL: Requesting Gemini for image {instance.id}")
+            # 4. Виконання запиту до Gemini API
+            print(f"API CALL: Requesting Gemini for new image content (hash: {file_hash})")
             try:
-                model = genai.GenerativeModel('models/gemini-2.5-flash')
+                # Зверни увагу: якщо gemini-2.5-flash видасть помилку 404,
+                # заміни на gemini-1.5-flash, оскільки 2.5 може бути в preview
+                model = genai.GenerativeModel('gemini-1.5-flash')
 
                 with open(image_path, 'rb') as f:
                     image_data = f.read()
@@ -71,7 +76,7 @@ class GeminiImageUploadView(APIView):
                 response = model.generate_content(content)
                 analysis_text = response.text
 
-                # 5. Зберігаємо результат у Redis на 24 години
+                # 5. Зберігаємо за хешем у Redis на 24 години
                 cache.set(cache_key, analysis_text, 86400)
 
                 # 6. Оновлення запису в базі даних
@@ -79,7 +84,6 @@ class GeminiImageUploadView(APIView):
                 instance.save()
 
                 return Response(GeminiImageSerializer(instance).data, status=status.HTTP_201_CREATED)
-
             except Exception as e:
                 import traceback
                 print(f"FULL ERROR:\n{traceback.format_exc()}")
