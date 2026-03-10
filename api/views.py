@@ -63,7 +63,7 @@ class GeminiImageUploadView(APIView):
             try:
                 # Зверни увагу: якщо gemini-2.5-flash видасть помилку 404,
                 # заміни на gemini-1.5-flash, оскільки 2.5 може бути в preview
-                model = genai.GenerativeModel('gemini-1.5-flash')
+                model = genai.GenerativeModel('models/gemini-2.5-flash')
 
                 with open(image_path, 'rb') as f:
                     image_data = f.read()
