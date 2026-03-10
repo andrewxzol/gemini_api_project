@@ -13,6 +13,7 @@ from .models import GeminiImage
 from .serializers import UserRegistrationSerializer
 from .serializers import GeminiImageSerializer
 from drf_spectacular.utils import extend_schema
+from django.shortcuts import render
 
 # Налаштування Gemini API
 GENAI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -100,3 +101,6 @@ class UserRegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
     permission_classes = [AllowAny]
+
+def register_page(request):
+    return render(request, 'register.html')
