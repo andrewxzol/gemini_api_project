@@ -1,12 +1,16 @@
 import os
 import google.generativeai as genai
 import hashlib
+from rest_framework.permissions import AllowAny
+from django.contrib.auth.models import User
 from django.core.cache import cache
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
+from rest_framework import generics
 from .models import GeminiImage
+from .serializers import UserRegistrationSerializer
 from .serializers import GeminiImageSerializer
 from drf_spectacular.utils import extend_schema
 
@@ -90,3 +94,9 @@ class GeminiImageUploadView(APIView):
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserRegisterView(generics.CreateAPIView):
+
+    queryset = User.objects.all()
+    serializer_class = UserRegistrationSerializer
+    permission_classes = [AllowAny]
