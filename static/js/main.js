@@ -31,7 +31,7 @@ async function uploadImage() {
         const data = await response.json();
 
         if (response.ok) {
-            msgDiv.innerText = "✅ Готово!";
+            msgDiv.innerText = "";
             analysisText.innerText = data.analysis_result;
             resultContainer.style.display = 'block';
         } else if (response.status === 401) {

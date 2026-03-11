@@ -1,103 +1,105 @@
-/* Головний контейнер Dashboard */
-.dashboard-container {
-    background: white;
-    padding: 40px;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    width: 100%;
-    max-width: 600px;
-    margin-top: 50px;
+:root {
+    --primary: #4361ee;
+    --primary-hover: #3a56d4;
+    --bg: #f8f9fc;
+    --text: #2b2d42;
+    --white: #ffffff;
+    --shadow: 0 10px 25px rgba(67, 97, 238, 0.1);
 }
 
-/* Верхня панель з вітанням та кнопкою виходу */
+body {
+    background-color: var(--bg);
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--text);
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+
+.dashboard-card {
+    background: var(--white);
+    width: 100%;
+    max-width: 800px;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+}
+
+/* Header UI */
 .header-ui {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 20px;
     margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #edf2f7;
 }
 
-.user-info {
-    font-size: 16px;
-    color: #444;
-}
-
-.user-greeting {
-    font-weight: 700;
-    color: #007bff;
-    text-transform: capitalize;
-}
-
-.logout-btn {
-    background: #fff;
-    color: #ff4757;
-    border: 1px solid #ff4757;
-    width: auto;
-    padding: 8px 16px;
-    font-size: 13px;
+.user-badge {
+    background: #e0e7ff;
+    color: var(--primary);
+    padding: 6px 14px;
+    border-radius: 50px;
     font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.logout-btn:hover {
-    background: #ff4757;
-    color: #fff;
-    transform: translateY(-1px);
-}
-
-/* Секція завантаження */
-.upload-section {
-    text-align: center;
-}
-
-.file-input-wrapper {
-    margin-bottom: 20px;
-    padding: 30px;
-    border: 2px dashed #cbd5e0;
-    border-radius: 12px;
-    background: #f8fafc;
-    transition: border-color 0.3s ease;
-}
-
-.file-input-wrapper:hover {
-    border-color: #007bff;
-}
-
-input[type="file"] {
     font-size: 14px;
-    color: #64748b;
 }
 
-/* Блок результату аналізу */
+.logout-link {
+    color: #ef4444;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.logout-link:hover { text-decoration: underline; }
+
+/* Upload Area */
+.upload-zone {
+    border: 2px dashed #cbd5e1;
+    border-radius: 15px;
+    padding: 40px;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: #fcfdfe;
+    margin-bottom: 25px;
+}
+
+.upload-zone:hover {
+    border-color: var(--primary);
+    background: #f0f4ff;
+}
+
+input[type="file"] { margin-bottom: 15px; }
+
+button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+}
+
+button:hover { background: var(--primary-hover); }
+
+/* Result Box */
 #result-container {
     margin-top: 30px;
-    padding: 20px;
     background: #f1f5f9;
-    border-left: 4px solid #007bff;
-    border-radius: 8px;
-    display: none; /* Показуємо лише при успіху */
-    text-align: left;
-}
-
-#result-container strong {
-    display: block;
-    margin-bottom: 10px;
-    color: #1e293b;
-    font-size: 15px;
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 5px solid var(--primary);
 }
 
 #analysis-text {
-    font-size: 14px;
-    line-height: 1.7;
+    line-height: 1.6;
+    font-size: 15px;
     color: #334155;
-    white-space: pre-wrap; /* Зберігає переноси рядків від AI */
-}
-
-/* Анімація завантаження */
-#message {
-    margin-top: 15px;
-    font-weight: 500;
-    font-size: 14px;
+    white-space: pre-wrap; /* Це важливо для форматування Gemini */
 }

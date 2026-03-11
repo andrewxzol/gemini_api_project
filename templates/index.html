@@ -2,41 +2,38 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Аналіз зображень | Gemini App</title>
+    <title>AI Аналіз | Gemini</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/main.css">
-    <style>
-        .header-ui { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .logout-btn { background: #ff4757; width: auto; padding: 5px 15px; font-size: 12px; }
-        .logout-btn:hover { background: #ff6b81; }
-        #result-container { margin-top: 20px; padding: 15px; background: #eef2f7; border-radius: 6px; display: none; }
-        .user-greeting { font-weight: bold; color: #007bff; }
-    </style>
 </head>
 <body>
     <script>
-        // Блокувальник: якщо токена немає, ми навіть не показуємо сторінку
         if (!localStorage.getItem('userToken')) {
-            window.location.href = '/login/';
+            window.location.href = '/api/login/';
         }
     </script>
 
-    <div class="form-container" style="width: 500px;">
+    <div class="dashboard-card">
         <div class="header-ui">
-            <div>Привіт, <span id="display-username" class="user-greeting">Користувач</span>!</div>
-            <button class="logout-btn" onclick="logout()">Вийти</button>
+            <div class="user-badge">
+                👋 Привіт, <span id="display-username">...</span>
+            </div>
+            <a href="#" class="logout-link" onclick="logout()">Вийти</a>
         </div>
 
-        <h2>Аналіз зображення Gemini</h2>
+        <h2 style="margin-top: 0;">Аналіз зображення Gemini AI</h2>
+        <p style="color: #64748b; margin-bottom: 25px;">Завантажте фото, щоб отримати детальний опис об'єктів від штучного інтелекту.</p>
 
-        <input type="file" id="imageInput" accept="image/*">
-        <button id="uploadBtn" onclick="uploadImage()">Проаналізувати</button>
+        <div class="upload-zone">
+            <input type="file" id="imageInput" accept="image/*">
+            <button id="uploadBtn" onclick="uploadImage()">Проаналізувати фото</button>
+        </div>
 
-        <div id="message"></div>
+        <div id="message" style="text-align: center; font-weight: 500;"></div>
 
-        <div id="result-container">
-            <strong>Результат аналізу:</strong>
-            <p id="analysis-text" style="font-size: 14px; line-height: 1.6; color: #333;"></p>
+        <div id="result-container" style="display: none;">
+            <h4 style="margin-top: 0; color: #1e293b;">✨ Результат аналізу:</h4>
+            <div id="analysis-text"></div>
         </div>
     </div>
 
