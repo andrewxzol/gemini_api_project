@@ -138,6 +138,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication', # Для зручності в адмінці
+    ],
 }
 
 ## SAVING IMPORT IMAGES
@@ -161,3 +165,27 @@ CACHES = {
 # Встановлюємо Redis як сховище для сесій (опціонально, але пришвидшує роботу адмінки)
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Gemini Image Analysis API',
+    'DESCRIPTION': 'API для аналізу зображень за допомогою Gemini та кешуванням у Redis',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+
+    # Додай цей блок для авторизації
+    'COMPONENT_SPLIT_PATCH': True,
+    'COMPONENT_NO_READ_ONLY_REQUIRED': True,
+    'SECURITY': [{
+        'TokenAuth': [],
+    }],
+    'APPEND_COMPONENTS': {
+        'securitySchemes': {
+            'TokenAuth': {
+                'type': 'apiKey',
+                'in': 'header',
+                'name': 'Authorization',
+                'description': 'Введіть токен у форматі: Token <ваш_токен>'
+            }
+        }
+    }
+}
