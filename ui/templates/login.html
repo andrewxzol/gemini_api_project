@@ -1,26 +1,21 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
     <title>Вхід | Gemini App</title>
-    <link rel="stylesheet" href="/css/login.css">
+    <link rel="stylesheet" href="{% static 'css/register.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
 </head>
 <body>
     <div class="form-container">
         <h2>Вхід у систему</h2>
-
-        <input type="text" id="username" placeholder="Логін (Username)" required>
+        <input type="text" id="username" placeholder="Логін" required>
         <input type="password" id="password" placeholder="Пароль" required>
-
         <button onclick="loginUser()">Увійти</button>
-
         <div id="message"></div>
-
-        <p style="text-align: center; margin-top: 15px; font-size: 13px;">
-            Немає акаунту? <a href="/register/">Зареєструватися</a>
-        </p>
+        <p>Немає акаунту? <a href="/api/join/">Зареєструватися</a></p>
     </div>
-
-    <script src="/js/login.js"></script>
+    <script src="{% static 'js/login.js' %}"></script>
 </body>
 </html>
