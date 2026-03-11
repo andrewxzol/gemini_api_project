@@ -1,4 +1,15 @@
+version: '3.8'
+
 services:
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password # Локальний пароль
+    ports:
+      - "5432:5432"
+
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
@@ -6,18 +17,13 @@ services:
       - .:/app
     ports:
       - "8000:8000"
-    environment:
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
     env_file:
       - .env
+    depends_on:
+      - db
+      - redis
+
   redis:
     image: redis:alpine
-    container_name: gemini_redis
-    command: redis-server --save 60 1 --loglevel warning
     ports:
       - "6379:6379"
-    restart: always

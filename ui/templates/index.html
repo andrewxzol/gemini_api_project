@@ -9,8 +9,21 @@
 </head>
 <body>
     <script>
+        // Перевіряємо токен. Якщо його немає — на сторінку входу.
+        // Використовуй '/' на початку, щоб шлях був абсолютним від домену
         if (!localStorage.getItem('userToken')) {
-            window.location.href = '/api/login/';
+            window.location.href = '/login/';
+        }
+
+        // Відображення імені користувача (зберігаємо при логіні)
+        document.addEventListener('DOMContentLoaded', () => {
+            const username = localStorage.getItem('username') || 'Користувач';
+            document.getElementById('display-username').textContent = username;
+        });
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login/';
         }
     </script>
 

@@ -32,7 +32,6 @@ ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     'rest_framework.authtoken',
-    'api.apps.ApiConfig',
     'rest_framework',
     'drf_spectacular',
     'django.contrib.admin',
@@ -41,6 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'backend.api.apps.ApiConfig',
+    'backend.accounts.apps.AccountsConfig',
+    'backend.analysis.apps.AnalysisConfig',
 ]
 
 MIDDLEWARE = [

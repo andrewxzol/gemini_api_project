@@ -20,7 +20,7 @@ async function uploadImage() {
     resultContainer.style.display = 'none';
 
     try {
-        const response = await fetch('/api/upload/', {
+        const response = await fetch('/api/analysis/upload/', {
             method: 'POST',
             headers: {
                 'Authorization': `Token ${token}` // ПЕРЕДАЄМО ТОКЕН ТУТ
@@ -47,5 +47,5 @@ async function uploadImage() {
 
 function logout() {
     localStorage.clear(); // Видаляємо токен та ім'я
-    window.location.href = '/api/login/';
+    window.location.href = '../../../backend/api/login/';
 }

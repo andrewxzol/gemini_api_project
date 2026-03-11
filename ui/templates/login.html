@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Вхід | Gemini App</title>
-    <link rel="stylesheet" href="{% static 'css/register.css' %}">
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
 </head>
 <body>
@@ -14,7 +13,7 @@
         <input type="password" id="password" placeholder="Пароль" required>
         <button onclick="loginUser()">Увійти</button>
         <div id="message"></div>
-        <p>Немає акаунту? <a href="/api/join/">Зареєструватися</a></p>
+        <p>Немає акаунту? <a href="/join/">Зареєструватися</a></p>
     </div>
     <script src="{% static 'js/login.js' %}"></script>
 </body>

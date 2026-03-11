@@ -5,7 +5,7 @@ async function registerUser() {
     const msgDiv = document.getElementById('message');
 
     try {
-        const response = await fetch('/api/registration/', {
+        const response = await fetch('/api/auth/register/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, email, password })
@@ -16,7 +16,7 @@ async function registerUser() {
             msgDiv.style.color = "green";
 
             setTimeout(() => {
-                window.location.href = '/api/login/';
+                window.location.href = '../../../backend/api/login/';
             },  1500);
 
         } else {

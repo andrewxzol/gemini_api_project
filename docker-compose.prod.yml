@@ -1,0 +1,31 @@
+services:
+  web:
+    build: .
+    # ПЕРЕВІР ШЛЯХ: якщо manage.py всередині backend, додай папку в шлях
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      # AWS підставить сюди значення зі своїх Variables
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      # На AWS база (RDS) зазвичай зовнішня, тому тут 'db' не потрібен,
+      # якщо ти підключаєшся по URL/Host.
+
+  redis:
+    image: redis:alpine
+    container_name: gemini_redis
+    command: redis-server --save 60 1 --loglevel warning
+    ports:
+      - "6379:6379"
+    restart: always

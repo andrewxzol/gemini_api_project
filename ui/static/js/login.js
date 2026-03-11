@@ -7,7 +7,7 @@ async function loginUser() {
     msgDiv.style.color = "#666";
 
     try {
-        const response = await fetch('/api/login-api/', {
+        const response = await fetch('/api/auth/login/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
