@@ -18,7 +18,8 @@ from rest_framework.authtoken.models import Token
 from .serializers import LoginSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
-
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 
 
 # Налаштування Gemini API
@@ -114,7 +115,7 @@ class UserRegisterView(generics.CreateAPIView):
 def register_page(request):
     return render(request, 'register.html')
 
-
+@method_decorator(csrf_exempt, name='dispatch')
 class UserLoginView(APIView):
     permission_classes = [AllowAny]
 
