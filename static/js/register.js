@@ -14,6 +14,11 @@ async function registerUser() {
         if (response.ok) {
             msgDiv.innerText = "Успіх! Користувача створено.";
             msgDiv.style.color = "green";
+
+            setTimeout(() => {
+                window.location.href = '/api/login/';
+            },  1500);
+
         } else {
             const data = await response.json();
             msgDiv.innerText = "Помилка: " + JSON.stringify(data);
