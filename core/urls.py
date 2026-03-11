@@ -14,4 +14,5 @@ urlpatterns = [
 
     # Головна сторінка
     path('dashboard/', TemplateView.as_view(template_name='index.html'), name='main-dashboard'),
+    path('login/', TemplateView.as_view(template_name='login.html'), name='login-ui'),
 ]

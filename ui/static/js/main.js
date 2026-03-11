@@ -47,5 +47,5 @@ async function uploadImage() {
 
 function logout() {
     localStorage.clear(); // Видаляємо токен та ім'я
-    window.location.href = '/login/';
+    window.location.href = '/api/login/';
 }
