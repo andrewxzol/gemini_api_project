@@ -14,6 +14,9 @@ from .serializers import UserRegistrationSerializer
 from .serializers import GeminiImageSerializer
 from drf_spectacular.utils import extend_schema
 from django.shortcuts import render
+from rest_framework.authtoken.models import Token
+from .serializers import LoginSerializer
+
 
 # Налаштування Gemini API
 GENAI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -104,3 +107,22 @@ class UserRegisterView(generics.CreateAPIView):
 
 def register_page(request):
     return render(request, 'register.html')
+
+
+class UserLoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            # Створюємо або отримуємо існуючий токен для цього юзера
+            token, created = Token.objects.get_or_create(user=user)
+
+            return Response({
+                'token': token.key,
+                'username': user.username,
+                'message': 'Вхід успішний'
+            }, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

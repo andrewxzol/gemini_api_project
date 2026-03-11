@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
+    'rest_framework.authtoken',
     'api.apps.ApiConfig',
     'rest_framework',
     'drf_spectacular',
