@@ -16,6 +16,9 @@ from drf_spectacular.utils import extend_schema
 from django.shortcuts import render
 from rest_framework.authtoken.models import Token
 from .serializers import LoginSerializer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
+
 
 
 # Налаштування Gemini API
@@ -27,6 +30,9 @@ else:
 
 
 class GeminiImageUploadView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     parser_classes = (MultiPartParser, FormParser)
 
     @extend_schema(
@@ -48,7 +54,7 @@ class GeminiImageUploadView(APIView):
         serializer = GeminiImageSerializer(data=request.data)
         if serializer.is_valid():
             # 1. Збереження об'єкта в базу даних RDS
-            instance = serializer.save()
+            instance = serializer.save(user=request.user)
             image_path = instance.image.path
 
             # Створюємо хеш файлу, щоб впізнати однакові картинки
