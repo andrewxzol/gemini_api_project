@@ -4,7 +4,7 @@ async function loginUser() {
     const msgDiv = document.getElementById('message');
 
     msgDiv.innerText = "Перевірка...";
-    msgDiv.style.color = "#666";
+    msgDiv.className = "loading-alert"; // Додаємо сірий клас
 
     try {
         const response = await fetch('/api/auth/login/', {
@@ -26,15 +26,15 @@ async function loginUser() {
             localStorage.setItem('username', data.username);
 
             msgDiv.innerText = "Успішний вхід! Перенаправлення...";
-            msgDiv.style.color = "#28a745";
+            msgDiv.className = "success-alert"; // Додаємо зелений клас
 
             // Через 1 секунду перекидаємо на головну
             setTimeout(() => {
                 window.location.href = '/dashboard/';
             }, 1000);
         } else {
-            msgDiv.innerText = "❌ Помилка: " + (data.non_field_errors || "Невірні дані");
-            msgDiv.style.color = "#dc3545";
+            msgDiv.innerText = "Введено невірний логін або пароль";
+            msgDiv.className = "error-alert"; // Додаємо червоний клас
         }
     } catch (error) {
         msgDiv.innerText = "🔌 Помилка з'єднання з сервером";
