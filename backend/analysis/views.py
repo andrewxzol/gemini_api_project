@@ -11,7 +11,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework import viewsets
 from .tasks import analyze_image_task
 from .models import ImageAnalysis
-
+from django.db import transaction
 
 # Налаштування Gemini API
 GENAI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -69,8 +69,8 @@ class ImageAnalysisViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         # 1. Зберігаємо запис у базу (створюємо об'єкт)
-        instance = serializer.save()
+        instance = serializer.save(user=self.request.user)
 
         # 2. Відправляємо ID об'єкта в Celery
         # Як тільки ти допишеш цей рядок, імпорт зверху стане активним!
-        analyze_image_task.delay(instance.id)
+        transaction.on_commit(lambda: analyze_image_task.delay(instance.id))
