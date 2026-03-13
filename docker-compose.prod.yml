@@ -31,11 +31,19 @@ services:
     restart: always
 
   celery:
-    build: . # Або image: tvoj_dockerhub/project_name:latest (якщо ти пушиш образи)
+    build: .
     command: celery -A core worker -l info
-    restart: always # Обов'язково! Якщо Celery впаде, Docker сам його підніме
+    volumes:
+      - .:/app  # ТЕПЕР ВІН БАЧИТЬ ТОЙ САМИЙ КОД, ЩО Й WEB
+    environment:
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     env_file:
-      - .env.prod # Твій бойовий файл з паролями
+      - .env.prod
     depends_on:
       - redis
-    # ЗВЕРНИ УВАГУ: Тут НЕМАЄ блоку volumes з `.:/app`!
+    restart: always
