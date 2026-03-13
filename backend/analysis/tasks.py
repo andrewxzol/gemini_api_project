@@ -8,7 +8,11 @@ import google.generativeai as genai
 @shared_task
 def analyze_image_task(instance_id):
     from backend.analysis.models import ImageAnalysis  # Імпортуємо тут
-
+    from django.conf import settings
+    # ДРУКУЄМО НАЛАШТУВАННЯ БАЗИ В ЛОГИ CELERY
+    db_host = settings.DATABASES['default'].get('HOST')
+    db_name = settings.DATABASES['default'].get('NAME')
+    print(f"DEBUG CELERY DB: Host={db_host}, Name={db_name}")
     time.sleep(2)
 
     try:
