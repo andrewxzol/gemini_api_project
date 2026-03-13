@@ -1,5 +1,6 @@
 import hashlib
 import os
+import time
 from django.core.cache import cache
 from celery import shared_task
 import google.generativeai as genai
@@ -7,6 +8,8 @@ import google.generativeai as genai
 @shared_task
 def analyze_image_task(instance_id):
     from .models import ImageAnalysis  # Імпортуємо тут
+
+    time.sleep(2)
 
     try:
         instance = ImageAnalysis.objects.get(id=instance_id)
