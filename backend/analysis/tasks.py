@@ -7,7 +7,7 @@ import google.generativeai as genai
 
 @shared_task
 def analyze_image_task(instance_id):
-    from .models import ImageAnalysis  # Імпортуємо тут
+    from backend.analysis.models import ImageAnalysis  # Імпортуємо тут
 
     time.sleep(2)
 
