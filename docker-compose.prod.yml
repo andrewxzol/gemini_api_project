@@ -29,3 +29,14 @@ services:
     ports:
       - "6379:6379"
     restart: always
+
+  celery:
+    build: . # Або image: tvoj_dockerhub/project_name:latest (якщо ти пушиш образи)
+    command: celery -A core worker -l info
+    restart: always # Обов'язково! Якщо Celery впаде, Docker сам його підніме
+    env_file:
+      - .env.prod # Твій бойовий файл з паролями
+    depends_on:
+      - redis
+      - db
+    # ЗВЕРНИ УВАГУ: Тут НЕМАЄ блоку volumes з `.:/app`!
