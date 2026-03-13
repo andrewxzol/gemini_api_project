@@ -1,7 +1,5 @@
 import os
 import google.generativeai as genai
-import hashlib
-from django.core.cache import cache
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -10,7 +8,9 @@ from .serializers import GeminiImageSerializer
 from drf_spectacular.utils import extend_schema
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
-
+from rest_framework import viewsets
+from .tasks import analyze_image_task
+from .models import ImageAnalysis
 
 
 # Налаштування Gemini API
@@ -24,11 +24,12 @@ else:
 class GeminiImageUploadView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-
     parser_classes = (MultiPartParser, FormParser)
 
     @extend_schema(
         operation_id="upload_image",
+        summary="Завантажити зображення для асинхронного аналізу",
+        description="Зберігає зображення та запускає фонову задачу в Celery. Результат з'явиться в полі analysis_result згодом.",
         request={
             'multipart/form-data': {
                 'type': 'object',
@@ -42,57 +43,34 @@ class GeminiImageUploadView(APIView):
         },
         responses={201: GeminiImageSerializer},
     )
+
     def post(self, request, *args, **kwargs):
         serializer = GeminiImageSerializer(data=request.data)
         if serializer.is_valid():
-            # 1. Збереження об'єкта в базу даних RDS
+            # 1. Тільки зберігаємо в БД
             instance = serializer.save(user=request.user)
-            image_path = instance.image.path
 
-            # Створюємо хеш файлу, щоб впізнати однакові картинки
-            with open(image_path, 'rb') as f:
-                file_hash = hashlib.md5(f.read()).hexdigest()
+            # 2. Віддаємо ID задачі в Celery.
+            # ВСЯ магія (Gemini, Redis, Hash) тепер буде в tasks.py
+            analyze_image_task.delay(instance.id)
 
-            # ВИПРАВЛЕНО: Використовуємо хеш як ключ кешу
-            cache_key = f"gemini_hash_{file_hash}"
-
-            # 3. Перевірка наявності результату в Redis
-            cached_result = cache.get(cache_key)
-            if cached_result:
-                print(f"CACHE HIT: Loading analysis for hash {file_hash} from Redis")
-                instance.analysis_result = cached_result
-                instance.save()
-                return Response(GeminiImageSerializer(instance).data, status=status.HTTP_200_OK)
-
-            # 4. Виконання запиту до Gemini API
-            print(f"API CALL: Requesting Gemini for new image content (hash: {file_hash})")
-            try:
-                # Зверни увагу: якщо gemini-2.5-flash видасть помилку 404,
-                # заміни на gemini-1.5-flash, оскільки 2.5 може бути в preview
-                model = genai.GenerativeModel('models/gemini-2.5-flash')
-
-                with open(image_path, 'rb') as f:
-                    image_data = f.read()
-
-                content = [
-                    "Describe this image in detail.",
-                    {"mime_type": "image/jpeg", "data": image_data}
-                ]
-
-                response = model.generate_content(content)
-                analysis_text = response.text
-
-                # 5. Зберігаємо за хешем у Redis на 24 години
-                cache.set(cache_key, analysis_text, 86400)
-
-                # 6. Оновлення запису в базі даних
-                instance.analysis_result = analysis_text
-                instance.save()
-
-                return Response(GeminiImageSerializer(instance).data, status=status.HTTP_201_CREATED)
-            except Exception as e:
-                import traceback
-                print(f"FULL ERROR:\n{traceback.format_exc()}")
-                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            # 3. Миттєво відповідаємо користувачу
+            return Response({
+                "id": instance.id,
+                "status": "Processing",
+                "message": "Image uploaded. Analysis started in background."
+            }, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ImageAnalysisViewSet(viewsets.ModelViewSet):
+    queryset = ImageAnalysis.objects.all()
+    serializer_class = GeminiImageSerializer
+
+    def perform_create(self, serializer):
+        # 1. Зберігаємо запис у базу (створюємо об'єкт)
+        instance = serializer.save()
+
+        # 2. Відправляємо ID об'єкта в Celery
+        # Як тільки ти допишеш цей рядок, імпорт зверху стане активним!
+        analyze_image_task.delay(instance.id)
