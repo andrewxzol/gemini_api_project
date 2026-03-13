@@ -38,5 +38,4 @@ services:
       - .env.prod # Твій бойовий файл з паролями
     depends_on:
       - redis
-      - db
     # ЗВЕРНИ УВАГУ: Тут НЕМАЄ блоку volumes з `.:/app`!
