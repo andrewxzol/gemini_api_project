@@ -89,6 +89,9 @@ DATABASES = {
         'PASSWORD': os.environ.get('DB_PASSWORD', 'password'),
         'HOST': os.environ.get('DB_HOST', 'db'),  # 'db' — це локальний docker, змінить на RDS
         'PORT': os.environ.get('DB_PORT', '5432'),
+        'OPTIONS': {
+                'sslmode': 'require',
+        }
     }
 }
 
