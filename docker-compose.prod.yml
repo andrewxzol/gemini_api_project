@@ -16,7 +16,7 @@ services:
       - DB_PORT=${DB_PORT}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
     env_file:
-      - .env.prod
+      - .env
     depends_on:
       - redis
       # На AWS база (RDS) зазвичай зовнішня, тому тут 'db' не потрібен,
