@@ -191,3 +191,19 @@ SPECTACULAR_SETTINGS = {
         }
     }
 }
+
+# ==========================================
+# CELERY CONFIGURATION
+# ==========================================
+
+# Використовуємо базу даних 0 для Celery (кеш використовує 1)
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
+
+# Формат серіалізації задач
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+# Синхронізація часу
+CELERY_TIMEZONE = TIME_ZONE

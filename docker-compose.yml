@@ -27,3 +27,14 @@ services:
     image: redis:alpine
     ports:
       - "6379:6379"
+
+  celery:
+    build: .
+    command: celery -A core worker -l info # ВАЖЛИВО: 'core' - це папка з твоїм settings.py
+    volumes:
+      - .:/app  # Підключаємо код локально, щоб не перезбирати контейнер при кожній зміні
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - db
