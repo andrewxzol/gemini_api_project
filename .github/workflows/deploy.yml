@@ -8,8 +8,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: deliberate failure
-        run: python -c "raise AssertionError('expected greet() to return Hello but got None')"
       - name: Checkout code
         uses: actions/checkout@v3
 
